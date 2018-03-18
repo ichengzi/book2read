@@ -1,0 +1,24 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@using book2read.Models;
+@model List<NovelPageViewModel>
+
+    <h2>圣墟</h2>
+<div>
+    @if(Model != null && Model.Any())
+    {
+        <ul>
+            @foreach (var item in Model)
+            {
+                <li>
+                    <a href="@item.Url">@item.Name</a>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>无数据返回</p>
+    }
+</div>

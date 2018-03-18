@@ -94,5 +94,61 @@ namespace book2read.Controllers
             //client.Dispose();
             return Json(nodes);
         }
+
+        public async Task<IActionResult> ReadBook3()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            HttpClient client = new HttpClient();
+            HttpResponseMessage result = await client.GetAsync("https://www.piaotian.com/html/8/8253/index.html");
+            Stream stream = await result.Content.ReadAsStreamAsync();
+
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.Load(stream, System.Text.Encoding.GetEncoding("GBK"));
+
+
+            //var contentDiv = doc.DocumentNode.SelectSingleNode("//div[@class='centent']");
+            var items = doc.DocumentNode.SelectNodes("//ul//li/a").Reverse().Take(10);
+            //the parameter is use xpath see: https://www.w3schools.com/xml/xml_xpath.asp 
+
+            var nodes = items.Select(x => new NovelPageViewModel
+            {
+                Name = x.InnerText,
+                //Url = "https://www.piaotian.com/html/8/8253/" + x.Attributes["href"].Value
+                Url = "/home/readbook4?articleid=" + x.Attributes["href"].Value.Replace(".html","")
+            }).ToList();
+            return View("ReadBook3",nodes);
+        }
+
+        public async Task<IActionResult> ReadBook4(string articleId)
+        {
+            if (articleId == null)
+            {
+                ViewData["Title"] = "Error";
+                return View("ReadBook4",new List<string> { "ArticleId is empty!"});
+            }
+
+            HttpClient client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(5);
+            var url = $"https://www.piaotian.com/html/8/8253/{articleId}.html";
+            HttpResponseMessage result = await client.GetAsync(url);
+            Stream stream = await result.Content.ReadAsStreamAsync();
+            client.Dispose();
+
+            HtmlDocument doc = new HtmlDocument();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            doc.Load(stream, System.Text.Encoding.GetEncoding("GBK"));
+
+            //var contentDiv = doc.DocumentNode.SelectSingleNode("//div[@id='content']");
+            //非标准html文档， 且经过js修改后才有这个id 的div
+            var body = doc.DocumentNode.InnerText;
+            var liststr = body.Split("\r\n");
+            var title = liststr[40];
+            var content = liststr[53].Replace("&nbsp;&nbsp;&nbsp;&nbsp;","\r\t");
+            var list = content.Split("\r\t").Select(x => x.Trim());
+            ViewData["Title"] = title;
+            return View("ReadBook4",list);
+        }
     }
 }
