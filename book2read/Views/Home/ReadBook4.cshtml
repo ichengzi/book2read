@@ -4,6 +4,7 @@
 @model IEnumerable<String>
 @{
     <h3>@ViewData["Title"]</h3>
+    <p><span>@ViewData["articleUpdatedDate"]</span></p>
     <div id="content">
         @foreach (var item in Model)
         {

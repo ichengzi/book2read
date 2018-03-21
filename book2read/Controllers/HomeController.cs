@@ -95,8 +95,16 @@ namespace book2read.Controllers
             return Json(nodes);
         }
 
-        public async Task<IActionResult> ReadBook3()
+        #region MyRegion
+        public async Task<IActionResult> ReadBook3(int count)
         {
+            var mycount = 10;
+            var max = 50;
+            if (count > 0 && count <= max)
+                mycount = count;
+            else if (count > max)
+                mycount = max;
+
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             HttpClient client = new HttpClient();
@@ -109,16 +117,18 @@ namespace book2read.Controllers
 
 
             //var contentDiv = doc.DocumentNode.SelectSingleNode("//div[@class='centent']");
-            var items = doc.DocumentNode.SelectNodes("//ul//li/a").Reverse().Take(10);
+            var items = doc.DocumentNode.SelectNodes("//ul//li/a").Reverse().Take(mycount);
             //the parameter is use xpath see: https://www.w3schools.com/xml/xml_xpath.asp 
 
             var nodes = items.Select(x => new NovelPageViewModel
             {
                 Name = x.InnerText,
                 //Url = "https://www.piaotian.com/html/8/8253/" + x.Attributes["href"].Value
-                Url = "/home/readbook4?articleid=" + x.Attributes["href"].Value.Replace(".html","")
+                Url = "/home/readbook4?articleid=" + x.Attributes["href"].Value.Replace(".html", "")
             }).ToList();
-            return View("ReadBook3",nodes);
+            ViewData["Title"] = "圣墟";
+            ViewData["bookTitle"] = "圣墟";
+            return View("ReadBook3", nodes);
         }
 
         public async Task<IActionResult> ReadBook4(string articleId)
@@ -126,13 +136,14 @@ namespace book2read.Controllers
             if (articleId == null)
             {
                 ViewData["Title"] = "Error";
-                return View("ReadBook4",new List<string> { "ArticleId is empty!"});
+                return View("ReadBook4", new List<string> { "ArticleId is empty!" });
             }
 
             HttpClient client = new HttpClient();
             client.Timeout = TimeSpan.FromSeconds(5);
             var url = $"https://www.piaotian.com/html/8/8253/{articleId}.html";
             HttpResponseMessage result = await client.GetAsync(url);
+            var articleUpdatedDate = result.Content.Headers.LastModified.GetValueOrDefault();//文章更新日期
             Stream stream = await result.Content.ReadAsStreamAsync();
             client.Dispose();
 
@@ -145,10 +156,91 @@ namespace book2read.Controllers
             var body = doc.DocumentNode.InnerText;
             var liststr = body.Split("\r\n");
             var title = liststr[40];
-            var content = liststr[53].Replace("&nbsp;&nbsp;&nbsp;&nbsp;","\r\t");
+            var content = liststr[53].Replace("&nbsp;&nbsp;&nbsp;&nbsp;", "\r\t");
             var list = content.Split("\r\t").Select(x => x.Trim());
             ViewData["Title"] = title;
-            return View("ReadBook4",list);
+
+            var utctime = articleUpdatedDate.ToUniversalTime();
+            TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
+            DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(utctime.DateTime, cstZone);
+            ViewData["articleUpdatedDate"] = cstTime == default(DateTime) ?
+                "" : cstTime.ToString("yyyy-MM-dd HH:mm:ss z");
+            return View("ReadBook4", list);
+        } 
+        #endregion
+
+        #region 凡人
+        public async Task<IActionResult> ReadBook5(int count)
+        {
+            var mycount = 10;
+            var max = 50;
+            if (count > 0 && count <= max)
+                mycount = count;
+            else if (count > max)
+                mycount = max;
+
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            HttpClient client = new HttpClient();
+            HttpResponseMessage result = await client.GetAsync("https://www.piaotian.com/html/9/9102/index.html");
+            Stream stream = await result.Content.ReadAsStreamAsync();
+
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.Load(stream, System.Text.Encoding.GetEncoding("GBK"));
+
+
+            //var contentDiv = doc.DocumentNode.SelectSingleNode("//div[@class='centent']");
+            var items = doc.DocumentNode.SelectNodes("//ul//li/a").Reverse().Take(mycount);
+            //the parameter is use xpath see: https://www.w3schools.com/xml/xml_xpath.asp 
+
+            var nodes = items.Select(x => new NovelPageViewModel
+            {
+                Name = x.InnerText,
+                //Url = "https://www.piaotian.com/html/9/9102/" + x.Attributes["href"].Value
+                Url = "/home/readbook6?articleid=" + x.Attributes["href"].Value.Replace(".html", "")
+            }).ToList();
+            ViewData["Title"] = "凡人修仙之仙界篇";
+            ViewData["bookTitle"] = "凡人修仙之仙界篇";
+            return View("ReadBook3", nodes);
         }
+
+        public async Task<IActionResult> ReadBook6(string articleId)
+        {
+            if (articleId == null)
+            {
+                ViewData["Title"] = "Error";
+                return View("ReadBook4", new List<string> { "ArticleId is empty!" });
+            }
+
+            HttpClient client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(5);
+            var url = $"https://www.piaotian.com/html/9/9102/{articleId}.html";
+            HttpResponseMessage result = await client.GetAsync(url);
+            var articleUpdatedDate = result.Content.Headers.LastModified.GetValueOrDefault();//文章更新日期
+            Stream stream = await result.Content.ReadAsStreamAsync();
+            client.Dispose();
+
+            HtmlDocument doc = new HtmlDocument();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            doc.Load(stream, System.Text.Encoding.GetEncoding("GBK"));
+
+            //var contentDiv = doc.DocumentNode.SelectSingleNode("//div[@id='content']");
+            //非标准html文档， 且经过js修改后才有这个id 的div
+            var body = doc.DocumentNode.InnerText;
+            var liststr = body.Split("\r\n");
+            var title = liststr[40];
+            var content = liststr[53].Replace("&nbsp;&nbsp;&nbsp;&nbsp;", "\r\t");
+            var list = content.Split("\r\t").Select(x => x.Trim());
+            ViewData["Title"] = title;
+
+            var utctime = articleUpdatedDate.ToUniversalTime();
+            TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
+            DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(utctime.DateTime, cstZone);
+            ViewData["articleUpdatedDate"] = cstTime == default(DateTime) ?
+                "" : cstTime.ToString("yyyy-MM-dd HH:mm:ss z");
+            return View("ReadBook4", list);
+        } 
+        #endregion
     }
 }

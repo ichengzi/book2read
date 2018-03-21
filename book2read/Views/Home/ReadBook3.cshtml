@@ -4,7 +4,7 @@
 @using book2read.Models;
 @model List<NovelPageViewModel>
 
-    <h2>圣墟</h2>
+    <h2>@ViewData["bookTitle"]</h2>
 <div>
     @if(Model != null && Model.Any())
     {
