@@ -143,7 +143,7 @@ namespace book2read.Controllers
             client.Timeout = TimeSpan.FromSeconds(5);
             var url = $"https://www.piaotian.com/html/8/8253/{articleId}.html";
             HttpResponseMessage result = await client.GetAsync(url);
-            var articleUpdatedDate = result.Content.Headers.LastModified.GetValueOrDefault();//文章更新日期
+            var articleUpdatedDate = result.Content.Headers.LastModified;//文章更新日期
             Stream stream = await result.Content.ReadAsStreamAsync();
             client.Dispose();
 
@@ -160,11 +160,12 @@ namespace book2read.Controllers
             var list = content.Split("\r\t").Select(x => x.Trim());
             ViewData["Title"] = title;
 
-            var utctime = articleUpdatedDate.ToUniversalTime();
-            TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
-            DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(utctime.DateTime, cstZone);
-            ViewData["articleUpdatedDate"] = cstTime == default(DateTime) ?
-                "" : cstTime.ToString("yyyy-MM-dd HH:mm:ss z");
+            //var utctime = articleUpdatedDate.ToUniversalTime();
+            //TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Shanghai");
+            //DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(utctime.DateTime, cstZone);
+            //ViewData["articleUpdatedDate"] = cstTime == default(DateTime) ?
+            //    "" : cstTime.ToString("yyyy-MM-dd HH:mm:ss z");
+            ViewData["articleUpdatedDate"] = articleUpdatedDate?.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss");
             return View("ReadBook4", list);
         } 
         #endregion
@@ -217,7 +218,7 @@ namespace book2read.Controllers
             client.Timeout = TimeSpan.FromSeconds(5);
             var url = $"https://www.piaotian.com/html/9/9102/{articleId}.html";
             HttpResponseMessage result = await client.GetAsync(url);
-            var articleUpdatedDate = result.Content.Headers.LastModified.GetValueOrDefault();//文章更新日期
+            var articleUpdatedDate = result.Content.Headers.LastModified;//文章更新日期
             Stream stream = await result.Content.ReadAsStreamAsync();
             client.Dispose();
 
@@ -234,11 +235,12 @@ namespace book2read.Controllers
             var list = content.Split("\r\t").Select(x => x.Trim());
             ViewData["Title"] = title;
 
-            var utctime = articleUpdatedDate.ToUniversalTime();
-            TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
-            DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(utctime.DateTime, cstZone);
-            ViewData["articleUpdatedDate"] = cstTime == default(DateTime) ?
-                "" : cstTime.ToString("yyyy-MM-dd HH:mm:ss z");
+            //var utctime = articleUpdatedDate.ToUniversalTime();
+            //TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
+            //DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(utctime.DateTime, cstZone);
+            //ViewData["articleUpdatedDate"] = cstTime == default(DateTime) ?
+            //    "" : cstTime.ToString("yyyy-MM-dd HH:mm:ss z");
+            ViewData["articleUpdatedDate"] = articleUpdatedDate?.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss");
             return View("ReadBook4", list);
         } 
         #endregion
