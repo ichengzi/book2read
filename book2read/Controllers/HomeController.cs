@@ -156,8 +156,8 @@ namespace book2read.Controllers
             var body = doc.DocumentNode.InnerText;
             var liststr = body.Split("\r\n");
             var title = liststr[40];
-            var content = liststr[53].Replace("&nbsp;&nbsp;&nbsp;&nbsp;", "\r\t");
-            var list = content.Split("\r\t").Select(x => x.Trim());
+            var content = liststr[53].Replace("&nbsp;&nbsp;&nbsp;&nbsp;", "\r\n");
+            var list = content.Split("\r\n").Select(x => x.Trim());
             ViewData["Title"] = title;
 
             //var utctime = articleUpdatedDate.ToUniversalTime();
